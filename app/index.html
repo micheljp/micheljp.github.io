@@ -1,0 +1,513 @@
+<!doctype html>
+<html class="no-js" lang="">
+  <head>
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Jason Paul Michel | Portfolio</title>
+
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <!-- Place favicon.ico in the root directory -->
+
+    <!-- build:css styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+
+    <!-- build:css styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="/bower_components/prism/themes/prism.css" />
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:js scripts/vendor/modernizr.js -->
+    <script src="/bower_components/modernizr/modernizr.js"></script>
+    <!-- endbuild -->
+  </head>
+  <body>
+    <!--[if IE]>
+      <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <div class="container-fluid">
+      <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container-fluid">
+          <!-- Brand and toggle get grouped for better mobile display -->
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Jason Paul Michel | Portfolio</a>
+          </div>
+
+          <!-- Collect the nav links, forms, and other content for toggling -->
+          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+              <li><a href="#drupal">Drupal</a></li>
+              <li><a href="#php">PHP</a></li>
+              <li><a href="#javascript">JavaScript</a></li>
+              <li><a href="#ror">Ruby on Rails</a></li>
+            </ul>
+          </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+      </nav>
+      <div class="row marketing">
+        <div class="col-xs-12">
+        <div class="col-lg-8 col-md-12 col-sm-12 col-lg-offset-2">
+          <h3 id="drupal">Drupal</h3>
+          <h4><a href="https://preview.lib.ohio-state.edu/collections">Ohio State University Libraries</a></h4>
+          <img class="img-thumbnail" src="../app/images/osu_website.png" width="320" height="240" />
+          <p class="lead">Responsive Drupal 8 site.</p>
+          <p>Project still in progress.  A much more complex site than Miami University.  <a href="#lexicon"><strong>Consumes local APIs to display library data</strong></a> and also posts data via JSON endpoints. <a href="#paragraphs"><strong>Implements Paragraphs module</strong></a> and Pattern Lab to create discrete design elements giving content creators flexibility to create intriguing content while also adhering to style guidelines.</p>
+          <p>Several custom modules built: a module to automatically create ICS files for Events and Exhibits; <a href="#calendar"><strong>a calendar module</strong></a> which builds a calendar from Drupal Event data and rendered via FullCalendar.io; a staff module which consumes staff directory data from canonical data source and automatically assigns roles; an alert module which listens for institution-wide alerts and displays data on site and others.</p>
+          <h5>Core Technologies</h5>
+          <ul>
+            <li>Drupal 8</li>
+            <li>Modules Utilized: Paragraphs, Migrate API, Video Embed Field, DropzoneJS, Metatag, Chosen</li>
+            <li>jQuery/JavaScript</li>
+            <li>Rest APIs</li>
+            <li>Libraries: FullCalendar, Moment, Twix, Animate.css </li>
+            <li>Compass/Sass</li>
+          </ul>
+          <hr>
+          <div id="lexicon" class="panel panel-primary">
+            <div class="panel-heading"><h4>JS File Consuming Local API</h4></div>
+            <div class="panel-body">
+              <p>Makes a call to local API and displays data if present.</p>
+              <div class="well">
+                <div class="embed-responsive embed-responsive-16by9">
+                  <video src="../app/videos/LexiconCall.mov" controls loop="true"></video>
+                </div>
+              </div>
+              <pre>
+                <code class="language-js">
+  (function ($, Drupal) {Drupal.behaviors.collectionsBehavior = {attach: function (context, settings) {
+       /**
+       * Variables for In Use AJAX calls.
+       *
+       */
+      var id;
+      var collection_id;
+      var sierra_id;
+      var collection_url_base = 'https://example.com/';
+      var icon = "<i class="fa fa-external-link" aria-hidden="true"></i>";
+      var dc_url_base = 'https://example.com';
+      var dc_url_query;
+
+      if ($(context).find('.collection-id').data('collection-id')) {
+        collection_id = $(context).find('.collection-id').data('collection-id');
+        dc_url_query = encodeURIComponent(collection_id.toLowerCase());
+      }
+
+      if ($(context).find('.collection-id').data('sierra-id')) {
+        sierra_id = $(context).find('.collection-id').data('sierra-id');
+      }
+
+      var dcPromise = $.get(dc_url_base + dc_url_query);
+
+      dcPromise.done(function(data) {
+        if (data.indexOf('No entries found') == -1) {
+          $(context).find('.collection-links').append("<p><a href=" + dc_url_base + dc_url_query + ">Digital Collections " + icon + "</a></p>");
+        }
+      });
+
+      var collectionIdPromise = $.getJSON(collection_url_base + collection_id);
+
+      collectionIdPromise.done(function(data) {
+        if (data.url) {
+          if (data.url.at) {
+            $(context).find('p.finding-aid-placeholder').remove();
+            $(context).find('.collection-links').prepend("<p><a href=" + data.url.at + ">Finding Aid " + icon + "</a></p>");
+          }
+        }
+
+        if (data.physical_description) {
+          if (data.historical) {
+            $(context).find('.summary-information').append("<p><strong>Date</strong>: " + data.historical + "</p>");
+          }
+          if (data.physical_description.extent) {
+            $(context).find('.summary-information').append("<p><strong>Extent</strong>: " + data.physical_description.extent + "</p>");
+          }
+          if (data.physical_description.description) {
+            $(context).find('.summary-information').append("<p><strong>Physical Description</strong>: " + data.physical_description.description + "</p>");
+          }
+        }
+
+        if (data.access_restrict) {
+          $(context).find('.access-information').append("<p><strong>Access to Materials</strong>: " + data.access_restrict + "</p>");
+        }
+
+        if (data.summary) {
+          $(context).find('.access-information').append("<p><strong>Summary</strong>: " + data.summary + "</p>");
+        }
+
+        if (data.scope_content) {
+          $(context).find('.access-information').prepend("<p><strong>Scope & Contents</strong>: " + data.scope_content + "</p>");
+        }
+
+        if (data.related_material.length &gt; 0) {
+          $(context).find('.summary-information').append("<p><strong>Related Material</strong>:</p>");
+          $(context).find('.summary-information').append("<ul class="related-material"><li></li></ul>");
+          var count = data.related_material.length;
+          for (var i = 0; i &lt; count; i++) {
+            var related_material_count = data.related_material[i].length;
+            for (var j = 0; j &lt; related_material_count; j++) {
+              var last = related_material_count - 1;
+              if (j == last) {
+                $(context).find('.related-material &gt; li').append(data.related_material[i][j]);
+              } else {
+                $(context).find('.related-material &gt; li').append(data.related_material[i][j] + " - ");
+              }
+            }
+          }
+
+          $(context).find('.summary-information').append("</ul>");
+        }
+      });
+
+      collectionIdPromise.fail(function(jqXHR, textStatus) {
+        var sierraIdPromise = $.getJSON(collection_url_base + sierra_id);
+        sierraIdPromise.done(function(data) {
+          if (data.url !== undefined) {
+            if (data.url.sierra) {
+              var match;
+              for (i = 0; i &lt; data.url.sierra.length; i++) {
+                if ((data.url.sierra[i].trim().indexOf('rave') !== -1) || (data.url.sierra[i].trim().indexOf('finding-aids') !== -1)) {
+                  match = data.url.sierra[i];
+                }
+              }
+              if (match !== undefined) {
+                var url = "<a href="' + match + '">Finding Aid " + icon + "</a>";
+                $(context).find('p.finding-aid-placeholder').remove();
+                $(context).find('.collection-links').prepend("<p>" + url + "</p>");
+              } else {
+                $(context).find('p.finding-aid-placeholder').remove();
+              }
+            } else {
+            $(context).find('p.finding-aid-placeholder').remove();
+            }
+          }
+          if (data.summary) {
+            $(context).find('.access-information').append("<p><strong>Summary</strong>: " + data.summary + "</p>");
+          }
+        });
+
+        sierraIdPromise.fail(function() {
+          $(context).find('p.finding-aid-placeholder').remove();
+        });
+
+        if (jqXHR.status === 0 || jqXHR.status === 500) {
+          $(context).find('.access-information').prepend("<p>We're sorry, but we have experienced an error connecting to the data source for this record. <a href="https://library.osu.edu/about/contact-us/webmaster-mail">Please let us know the URL and any details that might be helpful</a>.</p>");
+        }
+      });
+    }
+  };
+})(jQuery, Drupal);</code></pre>
+          </div>
+        </div>
+        <div id="paragraphs" class="panel panel-primary">
+          <div class="panel-heading"><h4>Paragraphs Functionality: PHP, Twig</h4></div>
+          <div class="panel-body">
+            <h5>Example Page Built with Paragraph Elements</h5>
+            <div class="well">
+              <div class="embed-responsive embed-responsive-16by9">
+                <video src="../app/videos/Annapurna.mov" controls loop="true"></video>
+              </div>
+            </div>
+            <h5>Mobile View</h5>
+            <div class="well">
+              <div class="embed-responsive embed-responsive-16by9">
+                <video src="../app/videos/annapurna_mobile.mov" controls loop="true"></video>
+              </div>
+            </div>
+            <h5>Editor Interface for Paragraphs</h5>
+            <p>Form values eventually get passed to Twig template.</p>
+            <div class="well">
+              <img class="img-thumbnail" src="../app/images/paragraph_edit.png" width="620" height="480" />
+            </div>
+            <h5>scarlet.theme</h5>
+            <p>PHP File Building Variables for Twig Template.</p>
+            <pre>
+              <code class="language-js">
+function scarlet_preprocess_paragraph__embedded_image_with_caption(&$variables) {
+  $paragraph = $variables['paragraph'];
+  $original_image = $paragraph-&gt;get('field_embedded_image')-&gt;entity-&gt;uri-&gt;value;
+  $variables['img_alignment'] = $paragraph-&gt;get('field_image_alignment')-&gt;value;
+  $variables['img_url'] = file_create_url($paragraph-&gt;get('field_embedded_image')-&gt;entity-&gt;uri-&gt;value);
+  $variables['large_img_url'] = ImageStyle::load('large')-&gt;buildUrl($original_image);
+  $variables['medium_img_url'] = ImageStyle::load('medium')-&gt;buildUrl($original_image);
+  $variables['small_img_url'] = ImageStyle::load('small')-&gt;buildUrl($original_image);
+  $variables['img_alt'] = $paragraph-&gt;get('field_embedded_image')-&gt;__get('alt');
+  $variables['caption'] = $paragraph-&gt;get('field_embedded_image_caption')-&gt;value;
+  $variables['img_size'] = $paragraph-&gt;get('field_image_size')-&gt;value;
+  }          </code>
+           </pre>
+           <h5>paragraph--embedded-image-with-caption.html.twig</h5>
+           <p>Twig Markup for Embedded Images</p>
+           <pre>
+             <code class="language-html">
+{% if img_size == 'large' %}
+ {% set modified_img_url = large_img_url %}
+{% elseif img_size == 'medium' %}
+ {% set modified_img_url = medium_img_url %}
+{% elseif img_size == 'small' %}
+ {% set modified_img_url = small_img_url %}
+{% else %}
+ {% set modified_img_url = img_url %}
+{% endif %}
+{% block paragraph %}
+ &lt;div{{ attributes.addClass(classes) }}&gt;
+   {% block content %}
+   &lt;figure class="embedded_image-{{ img_alignment }}"&gt;
+     &lt;a href="{{ img_url }}" data-lightbox="image-1" data-title="{{ caption }}"&gt;&lt;img class="img-rounded img-responsive" src="{{ modified_img_url }}" alt="{{ img_alt }}" /&gt;&lt;/a&gt;
+     {% if caption %}
+     &lt;figcaption&gt;{{ caption }}&lt;/figcaption&gt;
+     {% endif %}
+   &lt;/figure&gt;
+   {% endblock %}
+ &lt;/div&gt;
+{% endblock paragraph %}
+           </code>
+          </pre>
+        </div>
+      </div>
+      <div id="calendar" class="panel panel-primary">
+        <div class="panel-heading"><h4>Calendar Functionality: PHP, JavaScript</h4></div>
+        <div class="panel-body">
+          <h5>Calendar View of Event & Exhibit Content Types</h5>
+          <div class="well">
+            <div class="embed-responsive embed-responsive-16by9">
+              <video src="../app/videos/calendar.mov" controls loop="true"></video>
+            </div>
+          </div>
+          <h5>Mobile View</h5>
+          <div class="well">
+            <div class="embed-responsive embed-responsive-16by9">
+              <video src="../app/videos/calendar_mobile.mov" controls loop="true"></video>
+            </div>
+          </div>
+          <h5>CalendarGenerator.php</h5>
+          <p>PHP Class generating Events & Exhibits JSON output for use with FullCalendar.js</p>
+          <pre>
+            <code class="language-js">
+&lt;?php
+
+namespace Drupal\calendar\Service;
+
+use Drupal\node\Entity;
+use Drupal\Core\Entity\EntityTypeManager;
+use Drupal\Core\Url;
+use Drupal\Core;
+
+class CalendarGenerator
+{
+  public function getCalendar() {
+    $events = $this-&gt;getData();
+    return $events;
+  }
+
+  public function getData() {
+    $query = \Drupal::entityQuery('node');
+
+    $group = $query-&gt;orConditionGroup()
+    -&gt;condition('type', 'event')
+    -&gt;condition('type', 'exhibit');
+
+    $events_query = $query-&gt;condition($group)
+    -&gt;condition('status', 1)
+    -&gt;execute();
+
+    $events_nodes = \Drupal::entityTypeManager()-&gt;getStorage('node')-&gt;loadMultiple($events_query);
+    $events = array();
+    $pregCheck = array('/[[:punct:]]/','/[[:blank:]]/');
+    foreach ($events_nodes as $node) {
+      $options = ['absolute' =&gt; TRUE];
+      $nid = $node-&gt;nid-&gt;value;
+      $url = \Drupal\Core\Url::fromRoute('entity.node.canonical', ['node' =&gt; $nid], $options);
+      $url = $url-&gt;toString();
+      $event_title = $node-&gt;title-&gt;value;
+      $start_date = $node-&gt;field_start_date-&gt;value;
+      $end_date = $node-&gt;field_end_date-&gt;value;
+      $locationClass = strtolower(preg_replace($pregCheck, '-', $node-&gt;field_location-&gt;entity-&gt;title-&gt;value));
+      $type = strtolower($node-&gt;field_event_exhibit_type-&gt;entity-&gt;name-&gt;value);
+      if ($type != '') {
+        $classes = $type . " " . $locationClass;
+      } else {
+        $classes = $locationClass;
+      }
+      $event = array("id" =&gt; $nid, "title" =&gt; $event_title, "start" =&gt; $start_date, "end" =&gt; $end_date, "className" =&gt; $classes, "url" =&gt; $url, "location" =&gt; $locationClass, "type" =&gt; $type);
+
+      array_push($events, $event);
+    }
+    return $events;
+  }
+}          </code>
+         </pre>
+      </div>
+    </div>
+      </div>
+      <div class="col-lg-8 col-md-12 col-sm-12 col-lg-offset-2">
+        <h4><a href="http://www.lib.miamioh.edu">Miami University Libraries</a></h4>
+        <img class="img-thumbnail" src="../app/images/miami_website.png" width="320" height="240" />
+        <p class="lead">Responsive Drupal 7 site.</p>
+        <p>Integrates with Vimeo API for video tutorial functionality. Aside from serving as primary web presence for the University Libraries. It is also used as back-end for <a href="#touchscreens"><strong>large screen digital displays</strong></a> throughout library.</p>
+        <h5>Core Technologies</h5>
+        <ul>
+          <li>Drupal 7</li>
+          <li>Views Module</li>
+          <li>Rest APIs</li>
+          <li>XML Feeds</li>
+          <li>jQuery</li>
+        </ul>
+      </div>
+      </div>
+    </div>
+    <div class="row marketing">
+      <div class="col-xs-12">
+      <hr>
+      <div class="col-lg-8 col-md-12 col-sm-12 col-lg-offset-2">
+        <h3 id="php">PHP</h3>
+        <h4><a href="http://dog.lib.miamioh.edu/~jpmichel/apis/instagram/">Instagram API Contest</a></h4>
+        <p class="lead">A small app implementing a social media campaign/contest at Miami University Libraries.  Grabbed Instagram images and metadata via API and implemented a javascript/php voting mechanism to gather votes.</p>
+        <h5>Core Technologies</h5>
+        <ul>
+          <li>PHP</li>
+          <li>Instagram REST API</li>
+          <li>jQuery/JavaScript</li>
+        </ul>
+        <hr>
+        <h4>Library Data Dashboard Project</h4>
+        <p class="lead">This project's goal was to create a single application through which administrators and library staff could at a glance get dynamic and live data regarding as many aspects of the library for which we could reasonably get usable data.</p>
+        <p>The data is coming from many different vendors and services and is either pulled dynamically via an API, uploaded manually to a database or read out of different types of flat files. These data points are then run through the Highcharts.js library to produce data visualizations. PHP, MySQL, jQuery are the primary tools used.</p>
+        <h5>Core Technologies</h5>
+        <ul>
+          <li>PHP</li>
+          <li>Highcharts.js</li>
+          <li>jQuery/JavaScript</li>
+        </ul>
+        <hr>
+        <div class="panel panel-primary">
+          <div class="panel-body">
+            <div class="well">
+              <img class="img-thumbnail" src="../app/images/circ.png" width="640" height="480" />
+            </div>
+            <div class="well">
+              <img class="img-thumbnail" src="../app/images/data_viz.png" width="640" height="480" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row marketing">
+    <div class="col-xs-12">
+    <hr>
+    <div class="col-lg-8 col-md-12 col-sm-12 col-lg-offset-2">
+      <h3 id="javascript">JavaScript</h3>
+      <h4><a href="http://spec.lib.miamioh.edu/longform/cradle/">"Snowfall" Cradle of Coaches Digital Exhibit</a></h4>
+      <img class="img-thumbnail" src="../app/images/cradle-full.jpg" width="320" height="240" />
+      <p class="lead"><strong>From Miami University's Special Collections</strong>: Beginning in 2014, we are working to preserve not only a record of the materials displayed in our exhibits but also the narrative and story that is built from our collections in each exhibit. With the help of the University Libraries’ Emerging Technologies Cluster, we have recreated the ‘feel’ of each exhibit in a digital storytelling platform modeled on the New York Times’ Snow Fall project. These sites present a record of each exhibit in a dynamic, media-rich format.</p>
+      <p>This example may look a little familiar.  I was inspired by the New York Times' Snowfall Project but also heavily inspired by Outside's <a href="https://www.outsideonline.com/2162776/lost-everest"><strong>Lost on Everest</strong></a>. I wanted to tell the rich stories of our special collections through this medium.  Outside's site also inspired me to focus on Web Development solely for my career.</p>
+      <h5>Core Technologies</h5>
+      <ul>
+        <li>HTML5</li>
+        <li>CSS</li>
+        <li>jQuery/JavaScript</li>
+      </ul>
+      <hr>
+      <h4 id="touchscreens"><a href="http://dog.lib.muohio.edu/~jpmichel/dataviz/cam_model/">Large Screen Digital Touch Displays</a></h4>
+      <p class="lead">Large Touch Screens were placed throughout the Miami University Libraries.  The interface is driven by PHP and JavaScript/jQuery. Pulls data in from Miami University Libraries' main Drupal site.</p>
+      <h5>Core Technologies</h5>
+      <ul>
+        <li>PHP</li>
+        <li>Drupal 7</li>
+        <li>jQuery/JavaScript</li>
+      </ul>
+      <hr>
+      <h4>Library Data Dashboard Project</h4>
+      <p class="lead">This project's goal was to create a single application through which administrators and library staff could at a glance get dynamic and live data regarding as many aspects of the library for which we could reasonably get usable data.</p>
+      <p>The data is coming from many different vendors and services and is either pulled dynamically via an API, uploaded manually to a database or read out of different types of flat files. These data points are then run through the Highcharts.js library to produce data visualizations. PHP, MySQL, jQuery are the primary tools used.</p>
+      <h5>Core Technologies</h5>
+      <ul>
+        <li>PHP</li>
+        <li>Highcharts.js</li>
+        <li>jQuery/JavaScript</li>
+      </ul>
+      <hr>
+      <div class="panel panel-primary">
+        <div class="panel-body">
+          <div class="well">
+            <img class="img-thumbnail" src="../app/images/circ.png" width="640" height="480" />
+          </div>
+          <div class="well">
+            <img class="img-thumbnail" src="../app/images/data_viz.png" width="640" height="480" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row marketing">
+  <div class="col-xs-12">
+  <hr>
+    <div class="col-lg-8 col-md-12 col-sm-12 col-lg-offset-2">
+      <h3 id="ror">Ruby on Rails</h3>
+      <h4><a href="https://library.osu.edu/dc">Digital Collections</a></h4>
+      <p>Worked with team of Ruby developers.  My role was to develop the front-end.  Worked with ERB templates and JavaScript/jQuery.</p>
+      <h5>Core Technologies</h5>
+      <ul>
+        <li>ERB Templates</li>
+        <li>Sass</li>
+        <li>jQuery/JavaScript</li>
+      </ul>
+      <hr>
+      <h4><a href="http://aceofcupsbar.com/">Ace of Cups Bar</a></h4>
+      <p>Freelance work. Front-end is responsive and utilizes the Bootstrap framework. Integrates with a jQuery library called Isotope. Worked hand-in-hand with designer to translate design into a functional product.</p>
+      <h5>Core Technologies</h5>
+      <ul>
+        <li>Ruby on Rails</li>
+        <li>jQuery/JavaScript</li>
+      </ul>
+    </div>
+  </div>
+</div>
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+    <script>
+      (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+      function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+      e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+      e.src='https://www.google-analytics.com/analytics.js';
+      r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+      ga('create','UA-XXXXX-X');ga('send','pageview');
+    </script>
+
+    <!-- build:js scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="/bower_components/jquery/dist/jquery.js"></script>
+    <script src="/bower_components/modernizr/modernizr.js"></script>
+    <script src="/bower_components/prism/prism.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:js scripts/plugins.js -->
+    <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/affix.js"></script>
+    <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/alert.js"></script>
+    <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/dropdown.js"></script>
+    <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/tooltip.js"></script>
+    <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/modal.js"></script>
+    <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/transition.js"></script>
+    <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/button.js"></script>
+    <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/popover.js"></script>
+    <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/carousel.js"></script>
+    <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/scrollspy.js"></script>
+    <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/collapse.js"></script>
+    <script src="/bower_components/bootstrap-sass/assets/javascripts/bootstrap/tab.js"></script>
+    <!-- endbuild -->
+
+    <!-- build:js scripts/main.js -->
+    <script src="scripts/main.js"></script>
+    <!-- endbuild -->
+  </body>
+</html>
